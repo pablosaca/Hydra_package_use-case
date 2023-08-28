@@ -1,3 +1,4 @@
+import logging
 import joblib
 import numpy as np
 import pandas as pd
@@ -70,6 +71,7 @@ def save_model(current_path, model, norm):
     # Guardar los modelos y el proceso
     joblib.dump(norm, f"{current_path}/model/scale.joblib")
     joblib.dump(model, f"{current_path}/model/model.joblib")
+    logging.info("modelos guardados")
 
 
 def metrics(config, model, X_train, y_train):
@@ -78,11 +80,10 @@ def metrics(config, model, X_train, y_train):
     """
 
     # F1-score (train)
-    print(f"f1-score con {config.modelling.threshold}")
-    print("------------------------------")
+    logging.info(f"f1-score con {config.modelling.threshold}")
     y_pred = np.where(model.predict_proba(X_train)[:, 1] >= config.modelling.threshold,
                       config.target.pos_class, config.target.neg_class)
-    print(f"f1-score (train data): {f1_score(y_train, y_pred)}")
+    logging.info(f"f1-score (train data): {f1_score(y_train, y_pred)}")
 
 
 def model_train(config, X_train, y_train):
@@ -122,7 +123,7 @@ def model_train(config, X_train, y_train):
         gs_model = gs_model.fit(X_train, y_train)
 
         for params, mean_metric in zip(gs_model.cv_results_["params"], gs_model.cv_results_["mean_test_score"]):
-            print(f"Hyperparams: {params}: {mean_metric}")
+            logging.info(f"Hyperparams: {params}: {mean_metric}")
 
         # Se obtiene el mejor modelo
         model = gs_model.best_estimator_
@@ -188,7 +189,7 @@ def read_data(config, data_format, data_path):
     """
     Lectura de datos
     """
-    if not data_format == "csv":
+    if data_format != "csv":
         datos = pd.DataFrame()
     else:
         # Se leen los datos. Y un pequeño resumen de las variables numéricas

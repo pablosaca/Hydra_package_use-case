@@ -27,6 +27,11 @@ def run_training(config: DictConfig):
     # path del código fuente
     current_path = utils.get_original_cwd()
 
+    logging.info(f"original path: {current_path}")
+
+    current_path = current_path.replace(r"\src", "")
+    logging.info(f"original path: {current_path}")
+
     # directorio, nombre y formato donde se encuentran los datos
     data_path = config.dataset.path
     data_name = config.dataset.data
@@ -35,6 +40,7 @@ def run_training(config: DictConfig):
     data_path = f"{current_path}/{data_path}/{data_name}.{data_format}"
     datos = read_data(config, data_format, data_path)
     if datos.empty:
+        logging.info("Format file is not `csv`")
         raise TypeError("Format file is not `csv`")
 
     datos = preprocessing_features(config, datos)
@@ -42,17 +48,21 @@ def run_training(config: DictConfig):
     available_scale_method = ["normalization", "standardization"]
     X_train, y_train, scale = model_data_preprocessing(config, datos)
     if scale is None:
+        logging.info(f"Incorrect `scale` method. Only available {available_scale_method}")
         raise ValueError(f"Incorrect `scale` method. Only available {available_scale_method}")
 
     model = model_train(config, X_train, y_train)
 
     available_model_type = ["random_forest", "logistic"]
     if model is None:
+        logging.info(f"Incorrect model name. Only available {available_model_type}")
         raise ValueError(f"Incorrect model name. Only available {available_model_type}")
 
     metrics(config, model, X_train, y_train)
 
     save_model(current_path, model, scale)
+
+    logging.info("PROCESO TERMINADO...")
 
 
 if __name__ == '__main__':
