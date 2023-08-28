@@ -13,7 +13,7 @@ target:
 
 features:
   drop_features: ["x", "fnlwgt", "educational-num"]
-  scale_method: pepito
+  scale_method: normalization
 
 modelling:
   train_test_sample:
